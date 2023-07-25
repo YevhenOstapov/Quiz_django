@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+{% load compress %}
+{% load add_days %}
+{% block title %}
+    Create quiz
+{% endblock title %}
+{% block imports %}
+    {% compress css %}
+        <link type="text/x-scss"
+              rel="stylesheet"
+              href="{% static 'scss/create_quiz.scss' %}">
+    {% endcompress %}
+    <script src="{% static 'js/create_quiz.js' %}"></script>
+{% endblock imports %}
+{% block content %}
+    <h3 class="text-center">Create quiz</h3>
+    <div class="d-flex align-items-center justify-content-center">
+        <div class="actions-top-left action back-button invisible">
+            <input type="button"
+                   class="btn btn-outline-danger me-2"
+                   value="<"
+                   onclick="backButton()">
+        </div>
+        <span class="text-center d-none" id="page-counter">Page 1</span>
+        <div class="actions-top-right action next-button invisible">
+            <input type="button"
+                   class="btn btn-outline-danger ms-2"
+                   value=">"
+                   onclick="nextButton()">
+        </div>
+    </div>
+    <form action="" method="post" id="createQuizForm">
+        {% csrf_token %}
+        <div class="quiz">
+            <span class="d-block h5">Quiz name</span>
+            <input type="text"
+                   name="name"
+                   id="quiz_name"
+                   class="form-control mb-2"
+                   maxlength="200"
+                   placeholder="Name">
+            <span class="d-block h5">Quiz description</span>
+            <input type="text"
+                   name="description"
+                   id="quiz_description"
+                   class="form-control mb-2"
+                   maxlength="200"
+                   placeholder="Description">
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <span class="d-block h5">Quiz start date</span>
+                    <input type="date"
+                           name="start_date"
+                           id="quiz_start_date"
+                           class="form-control mb-2"
+                           value='{% now "Y-m-d" %}'
+                           placeholder="Start date">
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <span class="d-block h5">Quiz end date</span>
+                    <input type="date"
+                           name="end_date"
+                           id="quiz_end_date"
+                           class="form-control mb-2"
+                           value='{{ 7|add_days|date:"Y-m-d" }}'
+                           placeholder="End date">
+                </div>
+            </div>
+            <div class="actions position-absolute">
+                <input type="button"
+                       class="btn btn-outline-danger"
+                       value="Next"
+                       onclick="changeScreenToAddQuestion()">
+            </div>
+        </div>
+        <div class="questions">
+            <div class="question-answer d-none">
+            <div class="row mb-1">
+                <div class="col-md-6 col-sm-12">
+                    <span class="d-block h5">Type</span>
+                    <select name="quiz_type" class="form-select question-type mb-2">
+                        {% for quiz_type in quiz_types %}
+                            <option value="{{ quiz_type.0 }}">{{ quiz_type.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+                <div class="mb-1">
+                    <span>Question</span>
+                    <input type="text"
+                           name="question_name_1"
+                           class="form-control question"
+                           placeholder="Question">
+                </div>
+                <div class="answers">
+                    <div class="mb-1">
+                        <span>Answers</span>
+                    </div>
+                    <div class="answer d-flex mb-2">
+                        <input type="text"
+                               name="question_1_answer_1"
+                               class="form-control"
+                               maxlength="200"
+                               placeholder="Answer">
+                        <input class="btn btn-outline-danger ms-2"
+                               type="button"
+                               onclick="removeAnswer(this)"
+                               value="X">
+                    </div>
+                    <div class="answer d-flex mb-2">
+                        <input type="text"
+                               maxlength="200"
+                               name="question_1_answer_2"
+                               class="form-control"
+                               placeholder="Answer">
+                        <input class="btn btn-outline-danger ms-2"
+                               type="button"
+                               onclick="removeAnswer(this)"
+                               value="X">
+                    </div>
+                </div>
+                <input type="button"
+                       class="btn btn-outline-danger add-answer"
+                       value="Add answer"
+                       maxlength="200"
+                       onclick="addAnswer()">
+            </div>
+        </div>
+        <div class="actions-top-right action-create-quiz position-absolute invisible">
+            <input type="button"
+                   class="btn btn-outline-danger"
+                   value="Create"
+                   onclick="createQuiz()">
+        </div>
+        <div class="actions action position-absolute invisible add-question">
+            <input type="button"
+                   class="btn btn-outline-danger"
+                   value="Add question"
+                   onclick="addQuestion()">
+        </div>
+        <div class="actions-left action remove-question-button position-absolute invisible">
+            <input type="button"
+                   class="btn btn-outline-danger"
+                   value="Delete question"
+                   onclick="confirmRemoveQuestion()">
+        </div>
+        <div class="actions-left action back-to-start-button position-absolute invisible">
+            <input type="button"
+                   class="btn btn-outline-danger"
+                   value="Back to start"
+                   onclick="backToStart()">
+        </div>
+    </form>
+    <!-- Remove question modal -->
+    <div id="removeQuestionModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>Do you realy want remove this question?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                    <button type="button"
+                            class="btn btn-outline-danger"
+                            onclick="removeQuestion()"
+                            data-bs-dismiss="modal">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

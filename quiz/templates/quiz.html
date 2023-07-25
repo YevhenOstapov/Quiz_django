@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% load compress %}
+{% block imports %}
+    {% compress css %}
+        <link type="text/x-scss"
+              rel="stylesheet"
+              href="{% static 'scss/quiz.scss' %}">
+    {% endcompress %}
+    <script src="{% static 'js/quiz.js' %}"></script>
+{% endblock imports %}
+{% block title %}
+    {{ quiz.name }}
+{% endblock title %}
+{% block content %}
+    <h1 class="text-center h3">{{ quiz.name }}</h1>
+    <div class="row">
+        <div class="progress-bar-container">
+            <div class="progress mt-3">
+                <div class="progress-bar"
+                     id="progress_bar"
+                     role="progressbar"
+                     style="width: 0%"
+                     aria-valuenow="0"
+                     aria-valuemin="0"
+                     aria-valuemax="100"></div>
+            </div>
+        </div>
+        <div class="back-button-container d-none">
+            <input type="button"
+                   class="btn btn-outline-danger float-end position-absolute"
+                   value="<"
+                   onclick="backToPreviusQuestion()">
+        </div>
+        <div class="next-button action d-none">
+            <input type="button"
+                   class="btn btn-outline-danger ms-2 actions-top-right position-absolute"
+                   value=">"
+                   onclick="processMultiUserChoice()">
+        </div>
+    </div>
+    <div id="questions">
+        {% for question in quiz.questions.all %}
+            <div class="question-container {% if not forloop.first %}d-none{% endif %} {% if forloop.last %}last-question{% endif %}"
+                 id="question_{{ question.id }}">
+                <div class="description mt-3">
+                    <span>{{ question.name }}</span>
+                </div>
+                <div class="answers row mt-3">
+                    {% for answer in question.answers.all %}
+                        <div class="answer col-12">
+                            <input type="{% if question.type == 'SINGLE_SELECT' %}radio{% elif question.type == 'MULTI_SELECT' %}checkbox{% endif %}"
+                                   name="{{ answer.name }}"
+                                   class="form-check-input"
+                                   id="answer_{{ answer.id }}"
+                                   value="{{ answer.id }}"
+                                   onclick="{% if question.type == 'SINGLE_SELECT' %}processSingleUserChoice({{ question.id }}, {{ answer.id }}){% elif question.type == 'MULTI_SELECT' %}showOrHideNextButton(){% endif %}">
+                            <label class="form-check-label" for="answer-{{ answer.id }}">{{ answer.name }}</label>
+                            <div class="gray-line"></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="finish_quiz_container"
+         class="finish-quiz-container container d-flex align-items-center justify-content-center d-none">
+        <div class="description mt-3  position-absolute">
+            <span>Thank you for completing the quiz!🤘</span>
+        </div>
+        <div class="actions mt-3 mb-2 position-absolute">
+            <a href="{% url 'quiz:index' %}"
+               class="btn btn-outline-danger float-end">Finish</a>
+        </div>
+    </div>
+{% endblock content %}
